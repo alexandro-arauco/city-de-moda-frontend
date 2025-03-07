@@ -1,9 +1,9 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { Control, FieldErrors, useFieldArray } from "react-hook-form";
+import * as z from "zod";
 import { Button } from "../ui/button";
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -26,9 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { FormSchema } from "./RegisterForm";
 
 const days = [
   "Domingo",
@@ -40,90 +38,23 @@ const days = [
   "Sabado",
 ];
 
-const schema = z.object({
-  day: z
-    .string({ message: "Campo requerido" })
-    .min(1, "Por favor seleccione un dia"),
-  initHour: z
-    .string({ message: "Campo requerido" })
-    .min(1, "Por favor seleccione hora de apertura"),
-  endHour: z
-    .string({ message: "Campo requerido" })
-    .min(1, "Por favor seleccione hora de cierre"),
-});
+interface ScheduleProps {
+  control: Control<z.infer<typeof FormSchema>>;
+  errors: FieldErrors<z.infer<typeof FormSchema>>;
+}
 
-export function Schedule() {
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
-    defaultValues: {
-      day: "",
-      initHour: "",
-      endHour: "",
-    },
+export function Schedule({ control, errors }: ScheduleProps) {
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "schedule",
   });
 
-  const onSubmit = (values: z.infer<typeof schema>) => {
-    console.log(values);
-  };
+  console.log([errors]);
 
   return (
     <>
       <div className="max-w-full border p-2">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-3 gap-4 my-2 px-2">
-              <FormField
-                control={form.control}
-                name="day"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>Pais</FormLabel>
-                    <FormControl>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Seleccione un Pais" />
-                        </SelectTrigger>
-                        <SelectContent className="w-full">
-                          {days.map((d) => (
-                            <SelectItem key={d} value={d}>
-                              {d}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* <FormItem>
-                <FormLabel className="font-bold">Hora Apertura</FormLabel>
-                <FormControl>
-                  <Input type="time" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-              <FormItem>
-                <FormLabel className="font-bold">Hora Cierre</FormLabel>
-                <FormControl>
-                  <Input type="time" />
-                </FormControl>
-                <FormMessage />
-              </FormItem> */}
-            </div>
-            <Button
-              className="w-[100px] m-2 p-2"
-              size="default"
-              variant="default"
-            >
-              Anhadir
-            </Button>
-          </form>
-        </Form>
+        <FormLabel className="font-bold">Horarios de Atencion</FormLabel>
         <Table>
           <TableHeader>
             <TableRow>
@@ -134,13 +65,95 @@ export function Schedule() {
           </TableHeader>
 
           <TableBody>
-            <TableRow>
-              <TableCell>Domingo</TableCell>
-              <TableCell>08:00 am</TableCell>
-              <TableCell>18:00 pm</TableCell>
-            </TableRow>
+            {fields.map((field, index) => (
+              <TableRow key={field.id}>
+                <TableCell>
+                  <FormField
+                    control={control}
+                    name={`schedule.${index}.day`}
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormControl>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Seleccione un dia" />
+                            </SelectTrigger>
+                            <SelectContent className="w-full">
+                              {days.map((day) => (
+                                <SelectItem key={day} value={day}>
+                                  {day}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+
+                <TableCell>
+                  <FormField
+                    control={control}
+                    name={`schedule.${index}.initHour`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+
+                <TableCell>
+                  <FormField
+                    control={control}
+                    name={`schedule.${index}.endHour`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+
+                <TableCell>
+                  <Button
+                    onClick={() => {
+                      remove(index);
+                    }}
+                  >
+                    Eliminar
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
+
+        {errors.schedule && !Array.isArray(errors.schedule) && (
+          <p className="text-red-500 ">
+            Debe agregar al menos un horario de atencion
+          </p>
+        )}
+        <Button
+          className="mt-2"
+          type="button"
+          onClick={() => {
+            append({ day: "", initHour: "", endHour: "" });
+          }}
+        >
+          Agregar
+        </Button>
       </div>
     </>
   );

@@ -28,7 +28,7 @@ import { useEffect, useState } from "react";
 import FormInput from "./FormInput";
 import { Schedule } from "./Schedule";
 
-const formSchema = z.object({
+export const FormSchema = z.object({
   name: z.string().min(2, {
     message: "El nombre del Negocio debe tener al menos 2 caracteres.",
   }),
@@ -54,14 +54,23 @@ const formSchema = z.object({
     .min(1, {
       message: "Debe seleccionar al menos una categoría.",
     }),
+  schedule: z
+    .array(
+      z.object({
+        day: z.string().min(1, { message: "Error" }),
+        initHour: z.string().min(1, { message: "Error" }),
+        endHour: z.string().min(1, { message: "Error" }),
+      })
+    )
+    .min(1, "Debe agregar al menos un horario de atencion"),
 });
 
 export default function RegisterForm() {
   const { countries } = useCountryStatesContext();
   const [categories, setCategories] = useState<SelectOptions[]>([]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "",
       address: "",
@@ -69,6 +78,7 @@ export default function RegisterForm() {
       country: "",
       city: "",
       category: [],
+      schedule: [],
     },
   });
   const selectedCountry = form.watch("country");
@@ -96,12 +106,8 @@ export default function RegisterForm() {
     );
   };
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.infer<typeof FormSchema>) {
     console.log(values);
-  }
-
-  function onSubmitSchedule() {
-    
   }
 
   return (
@@ -210,7 +216,7 @@ export default function RegisterForm() {
           />
         </div>
 
-        <Schedule />
+        <Schedule control={form.control} errors={form.formState.errors} />
 
         <Button type="submit" className="w-full">
           Guardar
