@@ -71,6 +71,8 @@ export const FormSchema = z.object({
   additionalImages: z.array(z.any()).optional(),
 });
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
 export default function RegisterForm() {
   const { countries } = useCountryStatesContext();
   const [categoriesData, setCategoriesData] = useState<SelectOptions[]>([]);
@@ -104,9 +106,9 @@ export default function RegisterForm() {
   }, [selectedCountry, form]);
 
   const getCategories = async () => {
-    const categoriesData = (await fetch(
-      "http://localhost:8000/api/category"
-    ).then((res) => res.json())) as CategoriesResponse;
+    const categoriesData = (await fetch(`${apiUrl}/api/category`).then((res) =>
+      res.json()
+    )) as CategoriesResponse;
 
     setCategoriesData(
       categoriesData.data.map((c) => ({
@@ -130,6 +132,9 @@ export default function RegisterForm() {
     if (mainImage) {
       formData.append("mainImage", mainImage);
     }
+
+    formData.append("lat", "");
+    formData.append("lng", "");
 
     additionalImages.forEach((file) => {
       formData.append(`additionalImages`, file);

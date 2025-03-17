@@ -68,7 +68,7 @@ export const SingleImageUpload = ({
               id="single-image-upload"
               type="file"
               className="hidden"
-              accept="image/*"
+              accept=".jpg, .jpeg, .png"
               onChange={handleImageChange}
             />
           </div>

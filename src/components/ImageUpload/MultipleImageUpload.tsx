@@ -83,7 +83,9 @@ export const MultipleImageUpload = ({
                 type="button"
                 variant="outline"
                 className="relative w-full max-w-[200px] whitespace-normal h-auto"
-                onClick={() => document.getElementById("multiple-image-upload")?.click()}
+                onClick={() =>
+                  document.getElementById("multiple-image-upload")?.click()
+                }
               >
                 {label}
               </Button>
@@ -92,7 +94,7 @@ export const MultipleImageUpload = ({
                 type="file"
                 multiple
                 className="hidden"
-                accept="image/*"
+                accept=".jpg, .jpeg, .png"
                 onChange={handleImageChange}
               />
             </div>
@@ -104,4 +106,4 @@ export const MultipleImageUpload = ({
       </div>
     </div>
   );
-}; 
+};
