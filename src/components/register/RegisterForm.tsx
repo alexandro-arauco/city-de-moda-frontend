@@ -22,11 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CategoriesResponse } from "@/interfaces/category";
+import { CategoriesResponse } from "@/interfaces/categoriesData";
 import { SelectOptions } from "@/interfaces/multiselect";
 import { useEffect, useState } from "react";
 import FormInput from "./FormInput";
 import { Schedule } from "./Schedule";
+import { SingleImageUpload } from "@/components/ImageUpload/SingleImageUpload";
+import { MultipleImageUpload } from "@/components/ImageUpload/MultipleImageUpload";
 
 export const FormSchema = z.object({
   name: z.string().min(2, {
@@ -44,7 +46,7 @@ export const FormSchema = z.object({
   phone: z
     .string({ message: "Campo requerido" })
     .min(1, "Ingrese un numero telefono valido"),
-  category: z
+  categories: z
     .array(
       z.object({
         label: z.string(),
@@ -57,17 +59,23 @@ export const FormSchema = z.object({
   schedule: z
     .array(
       z.object({
-        day: z.string().min(1, { message: "Error" }),
-        initHour: z.string().min(1, { message: "Error" }),
-        endHour: z.string().min(1, { message: "Error" }),
+        day: z.string().min(1, { message: "Requerido" }),
+        initHour: z.string().min(1, { message: "Requerido" }),
+        endHour: z.string().min(1, { message: "Requerido" }),
       })
     )
     .min(1, "Debe agregar al menos un horario de atencion"),
+  mainImage: z.any().refine((val) => val !== null, {
+    message: "Debe subir una imagen principal",
+  }),
+  additionalImages: z.array(z.any()).optional(),
 });
 
 export default function RegisterForm() {
   const { countries } = useCountryStatesContext();
-  const [categories, setCategories] = useState<SelectOptions[]>([]);
+  const [categoriesData, setCategoriesData] = useState<SelectOptions[]>([]);
+  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [additionalImages, setAdditionalImages] = useState<File[]>([]);
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -77,8 +85,10 @@ export default function RegisterForm() {
       phone: "",
       country: "",
       city: "",
-      category: [],
+      categories: [],
       schedule: [],
+      mainImage: null,
+      additionalImages: [],
     },
   });
   const selectedCountry = form.watch("country");
@@ -94,20 +104,45 @@ export default function RegisterForm() {
   }, [selectedCountry, form]);
 
   const getCategories = async () => {
-    const categories = (await fetch("http://localhost:8000/api/category").then(
-      (res) => res.json()
-    )) as CategoriesResponse;
+    const categoriesData = (await fetch(
+      "http://localhost:8000/api/category"
+    ).then((res) => res.json())) as CategoriesResponse;
 
-    setCategories(
-      categories.data.map((category) => ({
-        label: category.name,
-        value: category.id,
+    setCategoriesData(
+      categoriesData.data.map((c) => ({
+        label: c.name,
+        value: c.id,
       }))
     );
   };
 
-  function onSubmit(values: z.infer<typeof FormSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof FormSchema>) {
+    const formData = new FormData();
+    
+    // Append all form fields
+    Object.entries(values).forEach(([key, value]) => {
+      if (key !== 'mainImage' && key !== 'additionalImages') {
+        formData.append(key, JSON.stringify(value));
+      }
+    });
+
+    // Append images
+    if (mainImage) {
+      formData.append('mainImage', mainImage);
+    }
+    
+    additionalImages.forEach((file, index) => {
+      formData.append(`additionalImages`, file);
+    });
+
+    const response = await fetch("http://localhost:8000/api/place", {
+      method: "POST",
+      body: formData,
+    })
+      .then((data) => data.json())
+      .catch((error) => console.log({ error }));
+
+    console.log({ response });
   }
 
   return (
@@ -122,17 +157,58 @@ export default function RegisterForm() {
 
         <FormField
           control={form.control}
-          name="category"
+          name="mainImage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="font-bold">Imagen Principal</FormLabel>
+              <FormControl>
+                <SingleImageUpload
+                  onImageChange={(file) => {
+                    setMainImage(file);
+                    field.onChange(file);
+                  }}
+                  label="Subir Imagen Principal"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="additionalImages"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="font-bold">Imágenes Adicionales</FormLabel>
+              <FormControl>
+                <MultipleImageUpload
+                  onImagesChange={(files) => {
+                    setAdditionalImages(files);
+                    field.onChange(files);
+                  }}
+                  maxImages={5}
+                  label="Subir Imágenes Adicionales"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="categories"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-bold">Categorias</FormLabel>
               <FormControl>
                 <MultiSelect
-                  options={categories}
+                  options={categoriesData}
                   selected={(field.value as unknown as SelectOptions[]) || []}
                   onChange={(values) => {
                     field.onChange(values);
-                    form.trigger("category");
+                    form.trigger("categories");
                   }}
                 />
               </FormControl>
@@ -216,7 +292,11 @@ export default function RegisterForm() {
           />
         </div>
 
-        <Schedule control={form.control} errors={form.formState.errors} />
+        <Schedule
+          control={form.control}
+          errors={form.formState.errors}
+          setValue={form.setValue}
+        />
 
         <Button type="submit" className="w-full">
           Guardar

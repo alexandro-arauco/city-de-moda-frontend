@@ -1,6 +1,11 @@
 "use client";
 
-import { Control, FieldErrors, useFieldArray } from "react-hook-form";
+import {
+  Control,
+  FieldErrors,
+  useFieldArray,
+  UseFormSetValue,
+} from "react-hook-form";
 import * as z from "zod";
 import { Button } from "../ui/button";
 import {
@@ -41,15 +46,20 @@ const days = [
 interface ScheduleProps {
   control: Control<z.infer<typeof FormSchema>>;
   errors: FieldErrors<z.infer<typeof FormSchema>>;
+  setValue: UseFormSetValue<z.infer<typeof FormSchema>>;
 }
 
-export function Schedule({ control, errors }: ScheduleProps) {
+export function Schedule({ control, errors, setValue }: ScheduleProps) {
   const { fields, append, remove } = useFieldArray({
     control,
     name: "schedule",
   });
 
-  console.log([errors]);
+  const getAvailableDays = (currentValue: string) => {
+    return days.filter(
+      (day) => day === currentValue || !fields.some((f) => f.day === day)
+    );
+  };
 
   return (
     <>
@@ -75,14 +85,17 @@ export function Schedule({ control, errors }: ScheduleProps) {
                       <FormItem className="w-full">
                         <FormControl>
                           <Select
-                            onValueChange={field.onChange}
+                            onValueChange={(value) => {
+                              setValue("schedule", [...fields]);
+                              field.onChange(value);
+                            }}
                             value={field.value}
                           >
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Seleccione un dia" />
                             </SelectTrigger>
                             <SelectContent className="w-full">
-                              {days.map((day) => (
+                              {getAvailableDays(field.value).map((day) => (
                                 <SelectItem key={day} value={day}>
                                   {day}
                                 </SelectItem>
@@ -141,7 +154,7 @@ export function Schedule({ control, errors }: ScheduleProps) {
         </Table>
 
         {errors.schedule && !Array.isArray(errors.schedule) && (
-          <p className="text-red-500 ">
+          <p className="text-red-500 text-sm">
             Debe agregar al menos un horario de atencion
           </p>
         )}
@@ -151,6 +164,7 @@ export function Schedule({ control, errors }: ScheduleProps) {
           onClick={() => {
             append({ day: "", initHour: "", endHour: "" });
           }}
+          disabled={fields.length >= 7}
         >
           Agregar
         </Button>
