@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CategoriesResponse } from "@/interfaces/categoriesData";
+import { CategoriesResponse } from "@/interfaces/category";
 import { SelectOptions } from "@/interfaces/multiselect";
 import { useEffect, useState } from "react";
 import FormInput from "./FormInput";
@@ -118,20 +118,20 @@ export default function RegisterForm() {
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
     const formData = new FormData();
-    
+
     // Append all form fields
     Object.entries(values).forEach(([key, value]) => {
-      if (key !== 'mainImage' && key !== 'additionalImages') {
+      if (key !== "mainImage" && key !== "additionalImages") {
         formData.append(key, JSON.stringify(value));
       }
     });
 
     // Append images
     if (mainImage) {
-      formData.append('mainImage', mainImage);
+      formData.append("mainImage", mainImage);
     }
-    
-    additionalImages.forEach((file, index) => {
+
+    additionalImages.forEach((file) => {
       formData.append(`additionalImages`, file);
     });
 

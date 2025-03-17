@@ -19,7 +19,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -61,7 +60,6 @@ const formSchema = z.object({
   city: z.string().min(2, {
     message: "City must be at least 2 characters.",
   }),
-  urlImage: z.instanceof(FileList),
 });
 
 export default function Home() {
@@ -223,29 +221,6 @@ export default function Home() {
                   )}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="urlImage"
-                render={({ field: { onChange, ...field } }) => (
-                  <FormItem>
-                    <FormLabel>Image</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => onChange(e.target.files)}
-                        name={field.name}
-                        ref={field.ref}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Upload an image for this location
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <Button type="submit" className="w-full">
                 Submit

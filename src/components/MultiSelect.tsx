@@ -53,8 +53,11 @@ export function MultiSelect({
     <Command className="overflow-visible bg-transparent">
       <div className="group border border-input px-3 py-2 text-sm ring-offset-background rounded-md focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
         <div className="flex gap-1 flex-wrap">
-          {selected.map((option) => (
-            <Badge key={option.value.toString()} variant="secondary">
+          {selected.map((option: SelectOptions) => (
+            <Badge
+              key={option.value ? option.value.toString() : option.label}
+              variant="secondary"
+            >
               {option.label}
               <button
                 className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -90,9 +93,9 @@ export function MultiSelect({
             <CommandList>
               <CommandEmpty>No results found.</CommandEmpty>
               <CommandGroup className="h-full overflow-auto">
-                {selectables.map((option) => (
+                {selectables.map((option: SelectOptions) => (
                   <CommandItem
-                    key={option.value.toString()}
+                    key={option.value ? option.value.toString() : option.label}
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
