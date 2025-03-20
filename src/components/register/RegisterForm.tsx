@@ -49,8 +49,8 @@ export const FormSchema = z.object({
   categories: z
     .array(
       z.object({
-        label: z.string(),
-        value: z.any(),
+        name: z.string(),
+        id: z.any(),
       })
     )
     .min(1, {
@@ -112,8 +112,8 @@ export default function RegisterForm() {
 
     setCategoriesData(
       categoriesData.data.map((c) => ({
-        label: c.name,
-        value: c.id,
+        name: c.name,
+        id: c.id,
       }))
     );
   };

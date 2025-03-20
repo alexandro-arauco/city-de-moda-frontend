@@ -30,11 +30,11 @@ export function MultiSelect({
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  // 🔥 Fix: Compare using `option.value` directly
+  // 🔥 Fix: Compare using `option.id` directly
   const handleUnselect = (option: SelectOptions) => {
     onChange(
       selected.filter(
-        (s) => JSON.stringify(s.value) !== JSON.stringify(option.value)
+        (s) => JSON.stringify(s.id) !== JSON.stringify(option.id)
       )
     );
   };
@@ -43,7 +43,7 @@ export function MultiSelect({
   const selectables = options.filter(
     (option) =>
       !selected.some(
-        (s) => JSON.stringify(s.value) === JSON.stringify(option.value)
+        (s) => JSON.stringify(s.id) === JSON.stringify(option.id)
       )
   );
 
@@ -55,10 +55,10 @@ export function MultiSelect({
         <div className="flex gap-1 flex-wrap">
           {selected.map((option: SelectOptions) => (
             <Badge
-              key={option.value ? option.value.toString() : option.label}
+              key={option.id ? option.id.toString() : option.name}
               variant="secondary"
             >
-              {option.label}
+              {option.name}
               <button
                 className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 onKeyDown={(e) => {
@@ -95,7 +95,7 @@ export function MultiSelect({
               <CommandGroup className="h-full overflow-auto">
                 {selectables.map((option: SelectOptions) => (
                   <CommandItem
-                    key={option.value ? option.value.toString() : option.label}
+                    key={option.id ? option.id.toString() : option.name}
                     onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -112,7 +112,7 @@ export function MultiSelect({
                       }
                     }}
                   >
-                    {option.label}
+                    {option.name}
                   </CommandItem>
                 ))}
               </CommandGroup>
