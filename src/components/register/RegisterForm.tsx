@@ -140,7 +140,7 @@ export default function RegisterForm() {
       formData.append(`additionalImages`, file);
     });
 
-    const response = await fetch("http://localhost:8000/api/place", {
+    const response = await fetch(`${apiUrl}/api/place`, {
       method: "POST",
       body: formData,
     })
