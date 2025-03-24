@@ -244,10 +244,10 @@ export default function RegisterForm() {
 
         <FormTable
           title="Redes Sociales"
-          columnsHeader={["Nombre", "Enlace"]}
+          columnsHeader={["Nombre", "URL / Link"]}
           control={form.control}
           name="socialMedia"
-          object={{ name: "", link: "" }}
+          object={{ name: "", url: "" }}
           render={(index, fields) => (
             <SocialMediaInput
               control={form.control}

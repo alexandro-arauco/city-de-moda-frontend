@@ -9,13 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ArrayPath,
-  Control,
-  FieldArray,
-  FieldArrayWithId,
-  useFieldArray,
-} from "react-hook-form";
+import { ArrayPath, Control, FieldArray, useFieldArray } from "react-hook-form";
 
 import { FieldValues } from "react-hook-form";
 

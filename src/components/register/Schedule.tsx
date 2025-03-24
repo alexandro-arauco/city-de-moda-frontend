@@ -31,7 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { FormSchema } from "./RegisterForm";
+import { RegisterSchema } from "./schemas/RegisterSchema";
 
 const days = [
   "Domingo",
@@ -44,9 +44,9 @@ const days = [
 ];
 
 interface ScheduleProps {
-  control: Control<z.infer<typeof FormSchema>>;
-  errors: FieldErrors<z.infer<typeof FormSchema>>;
-  setValue: UseFormSetValue<z.infer<typeof FormSchema>>;
+  control: Control<z.infer<typeof RegisterSchema>>;
+  errors: FieldErrors<z.infer<typeof RegisterSchema>>;
+  setValue: UseFormSetValue<z.infer<typeof RegisterSchema>>;
 }
 
 export function Schedule({ control, errors, setValue }: ScheduleProps) {
