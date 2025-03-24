@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,6 +17,7 @@ interface SocialMediaInputProps {
   control: Control<z.infer<typeof RegisterSchema>>;
   index: number;
   setValue: UseFormSetValue<z.infer<typeof RegisterSchema>>;
+  fields: any;
 }
 
 const social_media = [
@@ -33,6 +35,7 @@ export default function SocialMediaInput({
   control,
   index,
   setValue,
+  fields,
 }: SocialMediaInputProps) {
   return (
     <>
@@ -43,7 +46,7 @@ export default function SocialMediaInput({
           render={({ field }) => (
             <Select
               onValueChange={(value) => {
-                //setValue("socialMedia", [...fields]);
+                setValue("socialMedia", [...fields]);
                 field.onChange(value);
               }}
               value={field.value || ""}

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
 import { FormLabel } from "@/components/ui/form";
 import {
@@ -8,7 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrayPath, Control, FieldArray, useFieldArray } from "react-hook-form";
+import {
+  ArrayPath,
+  Control,
+  FieldArray,
+  FieldArrayWithId,
+  useFieldArray,
+} from "react-hook-form";
 
 import { FieldValues } from "react-hook-form";
 
@@ -18,7 +25,7 @@ interface FormTableProps<T extends FieldValues> {
   control: Control<T>;
   name: ArrayPath<T>;
   object: FieldArray<T, ArrayPath<T>>;
-  render: (index: number) => React.ReactNode;
+  render: (index: number, fields?: any) => React.ReactNode;
 }
 
 export default function FormTable<T extends FieldValues>({
@@ -49,7 +56,7 @@ export default function FormTable<T extends FieldValues>({
         <TableBody>
           {fields.map((field, index) => (
             <TableRow key={field.id}>
-              {render(index)}
+              {render(index, fields)}
               <TableCell>
                 <Button onClick={() => remove(index)}>Eliminar</Button>
               </TableCell>

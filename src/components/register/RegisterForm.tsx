@@ -27,17 +27,16 @@ import { CategoriesResponse } from "@/interfaces/category";
 import { SelectOptions } from "@/interfaces/multiselect";
 import { API_URL } from "@/lib/variables";
 import { useEffect, useState } from "react";
+import * as z from "zod";
+import FormTable from "../FormTable";
 import { Checkbox } from "../ui/checkbox";
 import { Textarea } from "../ui/textarea";
 import FormInput from "./FormInput";
 import { Schedule } from "./Schedule";
-import Services from "./Services";
 import {
   defaultValuesRegisterSchema,
   RegisterSchema,
 } from "./schemas/RegisterSchema";
-import SocialMedia from "./SocialMedia";
-import FormTable from "../FormTable";
 import ServicesInput from "./ServicesInput";
 import SocialMediaInput from "./SocialMediaInput";
 
@@ -240,21 +239,21 @@ export default function RegisterForm() {
                 <FormMessage />
               </FormItem>
             )}
-          ></FormField>
+          />
         </div>
 
-        {/* <SocialMedia control={form.control} setValue={form.setValue} /> */}
         <FormTable
           title="Redes Sociales"
           columnsHeader={["Nombre", "Enlace"]}
           control={form.control}
           name="socialMedia"
           object={{ name: "", link: "" }}
-          render={(index) => (
+          render={(index, fields) => (
             <SocialMediaInput
               control={form.control}
               index={index}
               setValue={form.setValue}
+              fields={fields}
             />
           )}
         />
@@ -325,8 +324,6 @@ export default function RegisterForm() {
           errors={form.formState.errors}
           setValue={form.setValue}
         />
-
-        {/* <Services control={form.control} /> */}
 
         <FormTable
           title="Servicios"
