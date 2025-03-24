@@ -12,8 +12,9 @@ import {
 import { useCountryStatesContext } from "@/context/CountryStatesContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 
+import { MultipleImageUpload } from "@/components/ImageUpload/MultipleImageUpload";
+import { SingleImageUpload } from "@/components/ImageUpload/SingleImageUpload";
 import { MultiSelect } from "@/components/MultiSelect";
 import {
   Select,
@@ -24,54 +25,21 @@ import {
 } from "@/components/ui/select";
 import { CategoriesResponse } from "@/interfaces/category";
 import { SelectOptions } from "@/interfaces/multiselect";
+import { API_URL } from "@/lib/variables";
 import { useEffect, useState } from "react";
+import { Checkbox } from "../ui/checkbox";
+import { Textarea } from "../ui/textarea";
 import FormInput from "./FormInput";
 import { Schedule } from "./Schedule";
-import { SingleImageUpload } from "@/components/ImageUpload/SingleImageUpload";
-import { MultipleImageUpload } from "@/components/ImageUpload/MultipleImageUpload";
-
-export const FormSchema = z.object({
-  name: z.string().min(2, {
-    message: "El nombre del Negocio debe tener al menos 2 caracteres.",
-  }),
-  address: z.string({ message: "Campo requerido" }).min(5, {
-    message: "El campo direccion no puede estar vacio",
-  }),
-  country: z
-    .string({ message: "Campo requerido" })
-    .min(1, "Por favor seleccione un Pais"),
-  city: z
-    .string({ message: "Campo requerido" })
-    .min(1, "Por favor seleccione una ciudad"),
-  phone: z
-    .string({ message: "Campo requerido" })
-    .min(1, "Ingrese un numero telefono valido"),
-  categories: z
-    .array(
-      z.object({
-        name: z.string(),
-        id: z.any(),
-      })
-    )
-    .min(1, {
-      message: "Debe seleccionar al menos una categoría.",
-    }),
-  schedule: z
-    .array(
-      z.object({
-        day: z.string().min(1, { message: "Requerido" }),
-        initHour: z.string().min(1, { message: "Requerido" }),
-        endHour: z.string().min(1, { message: "Requerido" }),
-      })
-    )
-    .min(1, "Debe agregar al menos un horario de atencion"),
-  mainImage: z.any().refine((val) => val !== null, {
-    message: "Debe subir una imagen principal",
-  }),
-  additionalImages: z.array(z.any()).optional(),
-});
-
-const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+import Services from "./Services";
+import {
+  defaultValuesRegisterSchema,
+  RegisterSchema,
+} from "./schemas/RegisterSchema";
+import SocialMedia from "./SocialMedia";
+import FormTable from "../FormTable";
+import ServicesInput from "./ServicesInput";
+import SocialMediaInput from "./SocialMediaInput";
 
 export default function RegisterForm() {
   const { countries } = useCountryStatesContext();
@@ -79,19 +47,9 @@ export default function RegisterForm() {
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [additionalImages, setAdditionalImages] = useState<File[]>([]);
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      name: "",
-      address: "",
-      phone: "",
-      country: "",
-      city: "",
-      categories: [],
-      schedule: [],
-      mainImage: null,
-      additionalImages: [],
-    },
+  const form = useForm<z.infer<typeof RegisterSchema>>({
+    resolver: zodResolver(RegisterSchema),
+    defaultValues: defaultValuesRegisterSchema,
   });
   const selectedCountry = form.watch("country");
 
@@ -106,7 +64,7 @@ export default function RegisterForm() {
   }, [selectedCountry, form]);
 
   const getCategories = async () => {
-    const categoriesData = (await fetch(`${apiUrl}/api/category`).then((res) =>
+    const categoriesData = (await fetch(`${API_URL}/api/category`).then((res) =>
       res.json()
     )) as CategoriesResponse;
 
@@ -118,7 +76,7 @@ export default function RegisterForm() {
     );
   };
 
-  async function onSubmit(values: z.infer<typeof FormSchema>) {
+  async function onSubmit(values: z.infer<typeof RegisterSchema>) {
     const formData = new FormData();
 
     // Append all form fields
@@ -140,7 +98,7 @@ export default function RegisterForm() {
       formData.append(`additionalImages`, file);
     });
 
-    const response = await fetch(`${apiUrl}/api/place`, {
+    const response = await fetch(`${API_URL}/api/place`, {
       method: "POST",
       body: formData,
     })
@@ -160,6 +118,33 @@ export default function RegisterForm() {
           placeholder="Ingrese el Nombre del Negocio"
         />
 
+        <FormInput
+          name="email"
+          form={form}
+          label="Email"
+          placeholder="Ingrese el Correo Electronico"
+        />
+
+        <FormInput
+          name="additionalContact"
+          form={form}
+          label="Informacion de contacto adicional"
+          placeholder="Ingrese informacion de contacto adicional"
+          render={(field) => (
+            <Textarea className="resize-none h-[100px]" {...field} />
+          )}
+        />
+
+        <FormInput
+          name="description"
+          form={form}
+          label="Descripcion del Negocio"
+          placeholder="Ingrese Descripcion del Negocio"
+          render={(field) => (
+            <Textarea className="resize-none h-[100px]" {...field} />
+          )}
+        />
+
         <FormField
           control={form.control}
           name="mainImage"
@@ -172,7 +157,7 @@ export default function RegisterForm() {
                     setMainImage(file);
                     field.onChange(file);
                   }}
-                  label="Subir Imagen Principal"
+                  label="Subir Imagen"
                 />
               </FormControl>
               <FormMessage />
@@ -185,7 +170,7 @@ export default function RegisterForm() {
           name="additionalImages"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="font-bold">Imágenes Adicionales</FormLabel>
+              <FormLabel className="font-bold">Galeria de Imagenes</FormLabel>
               <FormControl>
                 <MultipleImageUpload
                   onImagesChange={(files) => {
@@ -193,7 +178,7 @@ export default function RegisterForm() {
                     field.onChange(files);
                   }}
                   maxImages={5}
-                  label="Subir Imágenes Adicionales"
+                  label="Subir Imagen"
                 />
               </FormControl>
               <FormMessage />
@@ -229,11 +214,49 @@ export default function RegisterForm() {
           form={form}
         />
 
-        <FormInput
-          name="phone"
-          label="Telefono / Movil"
-          placeholder="Ingrese el nro de telefono"
-          form={form}
+        <div className="space-y-4">
+          <FormInput
+            name="phone"
+            label="Telefono / Movil"
+            placeholder="Ingrese el nro de telefono"
+            form={form}
+          />
+          <FormField
+            control={form.control}
+            name="whatsapp"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      checked={field.value}
+                      onChange={(e) =>
+                        field.onChange((e.target as HTMLInputElement).checked)
+                      }
+                    />
+                    <FormLabel>Cuenta con Whatsapp?</FormLabel>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          ></FormField>
+        </div>
+
+        {/* <SocialMedia control={form.control} setValue={form.setValue} /> */}
+        <FormTable
+          title="Redes Sociales"
+          columnsHeader={["Nombre", "Enlace"]}
+          control={form.control}
+          name="socialMedia"
+          object={{ name: "", link: "" }}
+          render={(index) => (
+            <SocialMediaInput
+              control={form.control}
+              index={index}
+              setValue={form.setValue}
+            />
+          )}
         />
 
         <div className="grid grid-cols-2 gap-4">
@@ -301,6 +324,19 @@ export default function RegisterForm() {
           control={form.control}
           errors={form.formState.errors}
           setValue={form.setValue}
+        />
+
+        {/* <Services control={form.control} /> */}
+
+        <FormTable
+          title="Servicios"
+          columnsHeader={["Nombre"]}
+          control={form.control}
+          name="schedules"
+          object={{ name: "" }}
+          render={(index) => (
+            <ServicesInput control={form.control} index={index} />
+          )}
         />
 
         <Button type="submit" className="w-full">

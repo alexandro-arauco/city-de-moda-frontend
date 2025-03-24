@@ -6,7 +6,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "../ui/input";
-import { UseFormReturn } from "react-hook-form";
+import { ControllerRenderProps, UseFormReturn } from "react-hook-form";
 
 import { FieldValues, Path } from "react-hook-form";
 
@@ -15,6 +15,7 @@ interface FormInputProps<T extends FieldValues> {
   name: Path<T>;
   label: string;
   placeholder: string;
+  render?: (field: ControllerRenderProps) => React.ReactNode;
 }
 
 export default function FormInput<T extends FieldValues>({
@@ -22,6 +23,7 @@ export default function FormInput<T extends FieldValues>({
   name,
   label,
   placeholder,
+  render,
 }: FormInputProps<T>) {
   return (
     <FormField
@@ -31,7 +33,11 @@ export default function FormInput<T extends FieldValues>({
         <FormItem>
           <FormLabel className="font-bold">{label}</FormLabel>
           <FormControl>
-            <Input placeholder={placeholder} {...field} />
+            {render ? (
+              render(field as ControllerRenderProps)
+            ) : (
+              <Input placeholder={placeholder} {...field} />
+            )}
           </FormControl>
           <FormMessage />
         </FormItem>
