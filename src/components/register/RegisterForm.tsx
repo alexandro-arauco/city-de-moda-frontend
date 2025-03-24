@@ -30,6 +30,14 @@ import { useEffect, useState } from "react";
 import * as z from "zod";
 import FormTable from "../FormTable";
 import { Checkbox } from "../ui/checkbox";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { Textarea } from "../ui/textarea";
 import FormInput from "./FormInput";
 import { Schedule } from "./Schedule";
@@ -45,6 +53,7 @@ export default function RegisterForm() {
   const [categoriesData, setCategoriesData] = useState<SelectOptions[]>([]);
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [additionalImages, setAdditionalImages] = useState<File[]>([]);
+  const [openModal, setOpenModal] = useState(false);
 
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
@@ -104,242 +113,265 @@ export default function RegisterForm() {
       .then((data) => data.json())
       .catch((error) => console.log({ error }));
 
-    console.log({ response });
+    if (response.status === 200) {
+      setOpenModal(true);
+    }
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormInput
-          name="name"
-          form={form}
-          label="Nombre del Negocio"
-          placeholder="Ingrese el Nombre del Negocio"
-        />
-
-        <FormInput
-          name="email"
-          form={form}
-          label="Email"
-          placeholder="Ingrese el Correo Electronico"
-        />
-
-        <FormInput
-          name="additionalContact"
-          form={form}
-          label="Informacion de contacto adicional"
-          placeholder="Ingrese informacion de contacto adicional"
-          render={(field) => (
-            <Textarea className="resize-none h-[100px]" {...field} />
-          )}
-        />
-
-        <FormInput
-          name="description"
-          form={form}
-          label="Descripcion del Negocio"
-          placeholder="Ingrese Descripcion del Negocio"
-          render={(field) => (
-            <Textarea className="resize-none h-[100px]" {...field} />
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="mainImage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="font-bold">Imagen Principal</FormLabel>
-              <FormControl>
-                <SingleImageUpload
-                  onImageChange={(file) => {
-                    setMainImage(file);
-                    field.onChange(file);
-                  }}
-                  label="Subir Imagen"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="additionalImages"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="font-bold">Galeria de Imagenes</FormLabel>
-              <FormControl>
-                <MultipleImageUpload
-                  onImagesChange={(files) => {
-                    setAdditionalImages(files);
-                    field.onChange(files);
-                  }}
-                  maxImages={5}
-                  label="Subir Imagen"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="categories"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="font-bold">Categorias</FormLabel>
-              <FormControl>
-                <MultiSelect
-                  options={categoriesData}
-                  selected={(field.value as unknown as SelectOptions[]) || []}
-                  onChange={(values) => {
-                    field.onChange(values);
-                    form.trigger("categories");
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormInput
-          name="address"
-          label="Direccion"
-          placeholder="Ingrese la direccion"
-          form={form}
-        />
-
-        <div className="space-y-4">
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormInput
-            name="phone"
-            label="Telefono / Movil"
-            placeholder="Ingrese el nro de telefono"
+            name="name"
+            form={form}
+            label="Nombre del Negocio"
+            placeholder="Ingrese el Nombre del Negocio"
+          />
+
+          <FormInput
+            name="email"
+            form={form}
+            label="Email"
+            placeholder="Ingrese el Correo Electronico"
+          />
+
+          <FormInput
+            name="additionalContact"
+            form={form}
+            label="Informacion de contacto adicional"
+            placeholder="Ingrese informacion de contacto adicional"
+            render={(field) => (
+              <Textarea className="resize-none h-[100px]" {...field} />
+            )}
+          />
+
+          <FormInput
+            name="description"
+            form={form}
+            label="Descripcion del Negocio"
+            placeholder="Ingrese Descripcion del Negocio"
+            render={(field) => (
+              <Textarea className="resize-none h-[100px]" {...field} />
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="mainImage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-bold">Imagen Principal</FormLabel>
+                <FormControl>
+                  <SingleImageUpload
+                    onImageChange={(file) => {
+                      setMainImage(file);
+                      field.onChange(file);
+                    }}
+                    label="Subir Imagen"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="additionalImages"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-bold">Galeria de Imagenes</FormLabel>
+                <FormControl>
+                  <MultipleImageUpload
+                    onImagesChange={(files) => {
+                      setAdditionalImages(files);
+                      field.onChange(files);
+                    }}
+                    maxImages={5}
+                    label="Subir Imagen"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="categories"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-bold">Categorias</FormLabel>
+                <FormControl>
+                  <MultiSelect
+                    options={categoriesData}
+                    selected={(field.value as unknown as SelectOptions[]) || []}
+                    onChange={(values) => {
+                      field.onChange(values);
+                      form.trigger("categories");
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormInput
+            name="address"
+            label="Direccion"
+            placeholder="Ingrese la direccion"
             form={form}
           />
-          <FormField
-            control={form.control}
-            name="whatsapp"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={field.value}
-                      onChange={(e) =>
-                        field.onChange((e.target as HTMLInputElement).checked)
-                      }
-                    />
-                    <FormLabel>Cuenta con Whatsapp?</FormLabel>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
 
-        <FormTable
-          title="Redes Sociales"
-          columnsHeader={["Nombre", "URL / Link"]}
-          control={form.control}
-          name="socialMedia"
-          object={{ name: "", url: "" }}
-          render={(index, fields) => (
-            <SocialMediaInput
-              control={form.control}
-              index={index}
-              setValue={form.setValue}
-              fields={fields}
+          <div className="space-y-4">
+            <FormInput
+              name="phone"
+              label="Telefono / Movil"
+              placeholder="Ingrese el nro de telefono"
+              form={form}
             />
-          )}
-        />
+            <FormField
+              control={form.control}
+              name="whatsapp"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="whatsapp"
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                      <FormLabel htmlFor="whatsapp">
+                        Cuenta con Whatsapp?
+                      </FormLabel>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
+          <FormTable
+            title="Redes Sociales"
+            columnsHeader={["Nombre", "URL / Link"]}
             control={form.control}
-            name="country"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Pais</FormLabel>
-                <FormControl>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccione un Pais" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      {countries.map((country) => (
-                        <SelectItem key={country.value} value={country.value}>
-                          {country.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            name="socialMedia"
+            object={{ name: "", url: "" }}
+            render={(index, fields) => (
+              <SocialMediaInput
+                control={form.control}
+                index={index}
+                setValue={form.setValue}
+                fields={fields}
+              />
             )}
           />
 
-          <FormField
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Pais</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccione un Pais" />
+                      </SelectTrigger>
+                      <SelectContent className="w-full">
+                        {countries.map((country) => (
+                          <SelectItem key={country.value} value={country.value}>
+                            {country.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Ciudad</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!selectedCountry} // Disable if no country is selected
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Seleccione una ciudad" />
+                      </SelectTrigger>
+                      <SelectContent className="w-full">
+                        {countries.filter(
+                          (c) => c.value === selectedCountry
+                        )[0] &&
+                          countries
+                            .filter((c) => c.value === selectedCountry)[0]
+                            .states.map((city) => (
+                              <SelectItem key={city.id} value={city.name}>
+                                {city.name}
+                              </SelectItem>
+                            ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Schedule
             control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Ciudad</FormLabel>
-                <FormControl>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={!selectedCountry} // Disable if no country is selected
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccione una ciudad" />
-                    </SelectTrigger>
-                    <SelectContent className="w-full">
-                      {countries.filter(
-                        (c) => c.value === selectedCountry
-                      )[0] &&
-                        countries
-                          .filter((c) => c.value === selectedCountry)[0]
-                          .states.map((city) => (
-                            <SelectItem key={city.id} value={city.name}>
-                              {city.name}
-                            </SelectItem>
-                          ))}
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            errors={form.formState.errors}
+            setValue={form.setValue}
+          />
+
+          <FormTable
+            title="Servicios"
+            columnsHeader={["Nombre"]}
+            control={form.control}
+            name="schedules"
+            object={{ name: "" }}
+            render={(index) => (
+              <ServicesInput control={form.control} index={index} />
             )}
           />
-        </div>
 
-        <Schedule
-          control={form.control}
-          errors={form.formState.errors}
-          setValue={form.setValue}
-        />
+          <Button type="submit" className="w-full">
+            Guardar
+          </Button>
+        </form>
+      </Form>
 
-        <FormTable
-          title="Servicios"
-          columnsHeader={["Nombre"]}
-          control={form.control}
-          name="schedules"
-          object={{ name: "" }}
-          render={(index) => (
-            <ServicesInput control={form.control} index={index} />
-          )}
-        />
+      {openModal && (
+        <Dialog open={openModal} onOpenChange={setOpenModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete your
+                account and remove your data from our servers.
+              </DialogDescription>
+            </DialogHeader>
 
-        <Button type="submit" className="w-full">
-          Guardar
-        </Button>
-      </form>
-    </Form>
+            <DialogClose className="bg-black text-white mx-auto p-2 m-2 rounded-sm text-sm">
+              Aceptar
+            </DialogClose>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }
