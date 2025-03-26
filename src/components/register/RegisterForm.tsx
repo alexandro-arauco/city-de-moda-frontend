@@ -63,8 +63,6 @@ export default function RegisterForm() {
   });
   const selectedCountry = form.watch("country");
 
-  console.log(form.err);
-
   useEffect(() => {
     getCategories();
   }, []);
