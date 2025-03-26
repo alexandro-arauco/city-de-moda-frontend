@@ -47,6 +47,8 @@ import {
 } from "./schemas/RegisterSchema";
 import ServicesInput from "./ServicesInput";
 import SocialMediaInput from "./SocialMediaInput";
+import VideosInput from "./VideosInput";
+import clsx from "clsx";
 
 export default function RegisterForm() {
   const { countries } = useCountryStatesContext();
@@ -60,6 +62,8 @@ export default function RegisterForm() {
     defaultValues: defaultValuesRegisterSchema,
   });
   const selectedCountry = form.watch("country");
+
+  console.log(form.err);
 
   useEffect(() => {
     getCategories();
@@ -113,7 +117,7 @@ export default function RegisterForm() {
       .then((data) => data.json())
       .catch((error) => console.log({ error }));
 
-    if (response.status === 200) {
+    if (response.message === "success") {
       setOpenModal(true);
     }
   }
@@ -222,6 +226,13 @@ export default function RegisterForm() {
             name="address"
             label="Direccion"
             placeholder="Ingrese la direccion"
+            form={form}
+          />
+
+          <FormInput
+            name="location"
+            label="Como llegar"
+            placeholder="Ingrese URL de Google Maps"
             form={form}
           />
 
@@ -342,15 +353,37 @@ export default function RegisterForm() {
             title="Servicios"
             columnsHeader={["Nombre"]}
             control={form.control}
-            name="schedules"
+            name="services"
             object={{ name: "" }}
             render={(index) => (
               <ServicesInput control={form.control} index={index} />
             )}
           />
 
-          <Button type="submit" className="w-full">
-            Guardar
+          <FormTable
+            title="Videos"
+            columnsHeader={["URL / Link"]}
+            control={form.control}
+            name="videos"
+            object={{ url: "" }}
+            render={(index) => (
+              <VideosInput control={form.control} index={index} />
+            )}
+          />
+
+          <Button
+            type="submit"
+            className={clsx(
+              "w-full",
+              form.formState.isSubmitting && "opacity-50 cursor-not-allowed"
+            )}
+            disabled={form.formState.isSubmitting}
+          >
+            {`${
+              form.formState.isSubmitting
+                ? "Guardando Informacion..."
+                : "Guardar"
+            }`}
           </Button>
         </form>
       </Form>

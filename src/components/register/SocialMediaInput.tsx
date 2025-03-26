@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FormField } from "@/components/ui/form";
+import { FormControl, FormField, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -44,24 +44,29 @@ export default function SocialMediaInput({
           control={control}
           name={`socialMedia.${index}.name`}
           render={({ field }) => (
-            <Select
-              onValueChange={(value) => {
-                setValue("socialMedia", [...fields]);
-                field.onChange(value);
-              }}
-              value={field.value || ""}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Seleccione una red social" />
-              </SelectTrigger>
-              <SelectContent className="w-full">
-                {social_media.map((item) => (
-                  <SelectItem key={item} value={item}>
-                    {item}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <>
+              <FormControl>
+                <Select
+                  onValueChange={(value) => {
+                    setValue("socialMedia", [...fields]);
+                    field.onChange(value);
+                  }}
+                  value={field.value || ""}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccione una red social" />
+                  </SelectTrigger>
+                  <SelectContent className="w-full">
+                    {social_media.map((item) => (
+                      <SelectItem key={item} value={item}>
+                        {item}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </>
           )}
         />
       </TableCell>
@@ -70,7 +75,15 @@ export default function SocialMediaInput({
           control={control}
           name={`socialMedia.${index}.url`}
           render={({ field }) => (
-            <Input placeholder="Ingrese la URL de la red social" {...field} />
+            <>
+              <FormControl>
+                <Input
+                  placeholder="Ingrese la URL de la red social"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </>
           )}
         />
       </TableCell>

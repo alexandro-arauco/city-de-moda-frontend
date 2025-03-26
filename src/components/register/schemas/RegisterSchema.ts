@@ -42,18 +42,29 @@ export const RegisterSchema = z.object({
     message: "Debe subir una imagen principal",
   }),
   additionalImages: z.array(z.any()).optional(),
-  services: z.array(z.object({ name: z.string().optional() })).optional(),
+  services: z
+    .array(
+      z.object({ name: z.string().min(1, { message: "Requerido" }).optional() })
+    )
+    .optional(),
   additionalContact: z.string().optional(),
   socialMedia: z
     .array(
       z.object({
-        name: z.string().optional(),
-        url: z.string().optional(),
+        name: z.string().min(1, { message: "Requerido" }).optional(),
+        url: z.string().url({ message: "URL / Link no valido" }).optional(),
       })
     )
     .optional(),
 
   location: z.string().optional(),
+  videos: z
+    .array(
+      z.object({
+        url: z.string().url({ message: "URL / Link no valido" }).optional(),
+      })
+    )
+    .optional(),
 });
 
 export const defaultValuesRegisterSchema = {
@@ -72,4 +83,5 @@ export const defaultValuesRegisterSchema = {
   additionalContact: "",
   socialMedia: [],
   whatsapp: false,
+  videos: [],
 };
